@@ -60,6 +60,11 @@ class PathTaskDto {
     if (!GridField.isValidShape(field)) {
       throw InvalidResponseException('Task $id has a malformed field');
     }
+    final height = field.length;
+    final width = field.isEmpty ? 0 : field.first.length;
+    if (!GridField.isSupportedSize(width: width, height: height)) {
+      throw UnsupportedFieldSizeException(taskId: id, width: width, height: height);
+    }
     final grid = GridField(field);
     final startPoint = start.toEntity();
     final endPoint = end.toEntity();

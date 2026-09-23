@@ -3,10 +3,17 @@ import 'package:path_finder/domain/entities/grid_point.dart';
 
 class GridField extends Equatable {
   GridField(List<String> rows)
-    : assert(isValidShape(rows), 'Rows must form a non-empty rectangle'),
+    : assert(isValidShape(rows), 'All rows must have the same length'),
+      assert(
+        isSupportedSize(width: rows.isEmpty ? 0 : rows.first.length, height: rows.length),
+        'Field size must be within $minSize..$maxSize in both dimensions',
+      ),
       rows = List.unmodifiable(rows);
 
   static const blockedCell = 'X';
+
+  static const minSize = 1;
+  static const maxSize = 100;
 
   final List<String> rows;
 
@@ -18,6 +25,11 @@ class GridField extends Equatable {
       rows.isNotEmpty &&
       rows.first.isNotEmpty &&
       rows.every((row) => row.length == rows.first.length);
+
+  static bool isSupportedSize({required int width, required int height}) =>
+      _isSupportedDimension(width) && _isSupportedDimension(height);
+
+  static bool _isSupportedDimension(int size) => size >= minSize && size <= maxSize;
 
   bool contains(GridPoint point) =>
       point.x >= 0 && point.x < width && point.y >= 0 && point.y < height;

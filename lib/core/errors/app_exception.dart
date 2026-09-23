@@ -30,6 +30,21 @@ final class InvalidResponseException extends AppException {
   const InvalidResponseException([super.message]);
 }
 
+final class UnsupportedFieldSizeException extends AppException {
+  const UnsupportedFieldSizeException({
+    required this.taskId,
+    required this.width,
+    required this.height,
+  });
+
+  final String taskId;
+  final int width;
+  final int height;
+
+  @override
+  List<Object?> get props => [taskId, width, height];
+}
+
 final class ApiErrorException extends AppException {
   const ApiErrorException(String super.message);
 }
