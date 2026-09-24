@@ -16,6 +16,7 @@ class FlutterToastToaster implements Toaster {
       Fluttertoast.showToast(
         msg: message,
         toastLength: Toast.LENGTH_LONG,
+        timeInSecForIosWeb: 4,
         gravity: ToastGravity.CENTER,
       ),
     );
