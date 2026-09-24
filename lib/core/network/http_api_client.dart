@@ -19,31 +19,49 @@ class HttpApiClient implements ApiClient {
   final AppLogger _logger;
 
   static const _headers = {'Accept': 'application/json'};
+  static const _jsonBodyHeaders = {..._headers, 'Content-Type': 'application/json'};
 
   static const _maxLoggedBodyLength = 4000;
   static const _preparedJson = JsonEncoder.withIndent('  ');
 
   @override
-  Future<Object?> getJson(Uri uri) async {
+  Future<Object?> getJson(Uri uri) {
+    _logger.info('GET $uri');
+    return _send('GET', uri, () => _client.get(uri, headers: _headers));
+  }
+
+  @override
+  Future<Object?> postJson(Uri uri, Object? body) {
+    _logger
+      ..info('POST $uri')
+      ..debug('Request body:\n${_textForLog(_preparedJson.convert(body))}');
+    return _send(
+      'POST',
+      uri,
+      () => _client.post(uri, headers: _jsonBodyHeaders, body: jsonEncode(body)),
+    );
+  }
+
+  Future<Object?> _send(String method, Uri uri, Future<http.Response> Function() request) async {
     _logger.info('GET $uri');
     final stopwatch = Stopwatch()..start();
     final http.Response response;
     try {
-      response = await _client.get(uri, headers: _headers).timeout(_timeout);
+      response = await request().timeout(_timeout);
     } on TimeoutException {
-      _logger.warning('GET $uri: no response in ${_timeout.inSeconds} s');
+      _logger.warning('$method $uri: no response in ${_timeout.inSeconds} s');
       throw const RequestTimeoutException();
     } on http.ClientException catch (e) {
-      _logger.warning('GET $uri failed', e);
+      _logger.warning('$method $uri failed', e);
       throw NetworkException(e.message);
     } on Exception catch (e) {
-      _logger.warning('GET $uri failed', e);
+      _logger.warning('$method $uri failed', e);
       throw NetworkException(e.toString());
     }
     final elapsed = stopwatch.elapsed;
 
     final json = _tryDecode(response.bodyBytes);
-    _logResponse('GET', uri, response, json, elapsed);
+    _logResponse(method, uri, response, json, elapsed);
     if (!_isSuccessful(response.statusCode)) {
       throw ServerException(response.statusCode, _messageFrom(json));
     }
@@ -85,9 +103,12 @@ class HttpApiClient implements ApiClient {
 
   String _bodyForLog(List<int> bodyBytes, Object? json) {
     if (bodyBytes.isEmpty) return '<empty>';
-    final text = json != null
-        ? _preparedJson.convert(json)
-        : utf8.decode(bodyBytes, allowMalformed: true);
+    return _textForLog(
+      json != null ? _preparedJson.convert(json) : utf8.decode(bodyBytes, allowMalformed: true),
+    );
+  }
+
+  String _textForLog(String text) {
     if (text.length <= _maxLoggedBodyLength) return text;
     final cut = text.length - _maxLoggedBodyLength;
     return '${text.substring(0, _maxLoggedBodyLength)}\n... $cut more characters';

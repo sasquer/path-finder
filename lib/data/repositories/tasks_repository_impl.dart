@@ -3,7 +3,9 @@ import 'package:path_finder/core/logging/app_logger.dart';
 import 'package:path_finder/core/network/api_client.dart';
 import 'package:path_finder/data/dto/api_response_dto.dart';
 import 'package:path_finder/data/dto/path_task_dto.dart';
+import 'package:path_finder/data/dto/task_result_dto.dart';
 import 'package:path_finder/domain/entities/path_task.dart';
+import 'package:path_finder/domain/entities/task_result.dart';
 import 'package:path_finder/domain/repositories/tasks_repository.dart';
 
 class TasksRepositoryImpl implements TasksRepository {
@@ -26,6 +28,19 @@ class TasksRepositoryImpl implements TasksRepository {
       return tasks;
     } on AppException catch (e) {
       _logger.warning('Tasks response rejected', e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> sendResults(Uri url, List<TaskResult> results) async {
+    final body = [for (final result in results) TaskResultDto.fromEntity(result).toJson()];
+    final json = await _apiClient.postJson(url, body);
+    try {
+      ApiResponseDto.throwIfError(json);
+      _logger.info('Server accepted ${results.length} results');
+    } on AppException catch (e) {
+      _logger.warning('Results rejected', e);
       rethrow;
     }
   }

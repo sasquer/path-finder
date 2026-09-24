@@ -22,4 +22,8 @@ class ApiResponseDto {
     if (error) throw ApiErrorException(message);
     return data;
   }
+
+  static void throwIfError(Object? json) {
+    if (json case {'error': true}) ApiResponseDto.fromJson(json).requireData();
+  }
 }

@@ -25,5 +25,6 @@ extension AppExceptionMessage on AppException {
     ApiErrorException(:final message) =>
       message == null || message.isEmpty ? 'The server returned an error' : message,
     StorageException() => 'Failed to save the URL on the device',
+    MissingApiUrlException() => 'The saved API URL was not found. Go back and enter it again',
   };
 }

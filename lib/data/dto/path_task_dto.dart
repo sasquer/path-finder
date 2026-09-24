@@ -13,10 +13,14 @@ class GridPointDto {
     throw InvalidResponseException('Invalid point: $json');
   }
 
+  factory GridPointDto.fromEntity(GridPoint point) => GridPointDto(x: point.x, y: point.y);
+
   final int x;
   final int y;
 
   GridPoint toEntity() => GridPoint(x, y);
+
+  Map<String, String> toJson() => {'x': '$x', 'y': '$y'};
 }
 
 class PathTaskDto {

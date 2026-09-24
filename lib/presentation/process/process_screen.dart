@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_finder/app/di/injection.dart';
 import 'package:path_finder/app/router/app_routes.dart';
+import 'package:path_finder/core/ui/toaster.dart';
 import 'package:path_finder/domain/entities/path_task.dart';
-import 'package:path_finder/domain/entities/task_result.dart';
+import 'package:path_finder/presentation/common/error_messages.dart';
 import 'package:path_finder/presentation/common/widgets/primary_button_with_loader.dart';
 import 'package:path_finder/presentation/process/cubit/process_cubit.dart';
 import 'package:path_finder/presentation/process/cubit/process_state.dart';
@@ -25,36 +26,50 @@ class ProcessScreen extends StatelessWidget {
 class _ProcessView extends StatelessWidget {
   const _ProcessView();
 
-  void _sendResults(BuildContext context, List<TaskResult> results) {
-    // Sending results to the server.
-    Navigator.of(context).pushNamed(AppRoutes.resultList, arguments: results);
+  static SendStatus? _sendStatusOf(ProcessState state) =>
+      state is ProcessCompleted ? state.sendStatus : null;
+
+  void _onSendStatusChanged(BuildContext context, ProcessState state) {
+    switch (state) {
+      case ProcessCompleted(sendStatus: SendStatus.success, :final results):
+        Navigator.of(context).pushNamed(AppRoutes.resultList, arguments: results);
+      case ProcessCompleted(sendStatus: SendStatus.failure, :final sendError?):
+        getIt<Toaster>().show(sendError.userMessage);
+      default:
+        break;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Process screen')),
-      body: SafeArea(
-        child: BlocBuilder<ProcessCubit, ProcessState>(
-          builder: (context, state) => Column(
-            children: [
-              Expanded(
-                child: Center(
-                  child: SingleChildScrollView(
+    return BlocListener<ProcessCubit, ProcessState>(
+      listenWhen: (previous, current) => _sendStatusOf(previous) != _sendStatusOf(current),
+      listener: _onSendStatusChanged,
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Process screen')),
+        body: SafeArea(
+          child: BlocBuilder<ProcessCubit, ProcessState>(
+            builder: (context, state) => Column(
+              children: [
+                Expanded(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(16),
+                      child: _ProgressView(state: state),
+                    ),
+                  ),
+                ),
+                if (state case ProcessCompleted(:final isSending))
+                  Padding(
                     padding: const EdgeInsets.all(16),
-                    child: _ProgressView(state: state),
+                    child: PrimaryButtonWithLoader(
+                      label: 'Send results to server',
+                      isLoading: isSending,
+                      onPressed: context.read<ProcessCubit>().sendResults,
+                    ),
                   ),
-                ),
-              ),
-              if (state case ProcessCompleted(:final results))
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: PrimaryButtonWithLoader(
-                    label: 'Send results to server',
-                    onPressed: () => _sendResults(context, results),
-                  ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

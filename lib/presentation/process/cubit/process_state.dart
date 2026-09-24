@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:path_finder/core/errors/app_exception.dart';
 import 'package:path_finder/domain/entities/task_result.dart';
 
 sealed class ProcessState extends Equatable {
@@ -20,15 +21,22 @@ final class ProcessInProgress extends ProcessState {
   const ProcessInProgress({required super.processed, required super.total});
 }
 
+enum SendStatus { idle, sending, success, failure }
+
 final class ProcessCompleted extends ProcessState {
-  ProcessCompleted(List<TaskResult> results)
-    : results = List.unmodifiable(results),
-      super(processed: results.length, total: results.length);
+  ProcessCompleted(List<TaskResult> results, {this.sendStatus = SendStatus.idle, this.sendError,})
+      : results = List.unmodifiable(results),
+        super(processed: results.length, total: results.length);
+
 
   final List<TaskResult> results;
+  final SendStatus sendStatus;
+  final AppException? sendError;
+
+  bool get isSending => sendStatus == SendStatus.sending;
 
   @override
-  List<Object?> get props => [...super.props, results];
+  List<Object?> get props => [...super.props, results, sendStatus, sendError];
 }
 
 final class ProcessFailed extends ProcessState {

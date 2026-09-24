@@ -52,3 +52,7 @@ final class ApiErrorException extends AppException {
 final class StorageException extends AppException {
   const StorageException([super.message]);
 }
+
+final class MissingApiUrlException extends AppException {
+  const MissingApiUrlException();
+}
