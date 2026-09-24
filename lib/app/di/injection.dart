@@ -42,7 +42,13 @@ void configureDependencies() {
       () => HomeCubit(apiUrlRepository: getIt(), tasksRepository: getIt(), urlValidator: getIt()),
     )
     ..registerFactoryParam<ProcessCubit, List<PathTask>, void>(
-      (tasks, _) =>
-          ProcessCubit(tasks: tasks, pathSolver: getIt(), logger: const ConsoleLogger('Process')),
+      (tasks, _) => ProcessCubit(
+        tasks: tasks,
+        pathSolver: getIt(),
+        tasksRepository: getIt(),
+        apiUrlRepository: getIt(),
+        urlValidator: getIt(),
+        logger: const ConsoleLogger('Process'),
+      ),
     );
 }
