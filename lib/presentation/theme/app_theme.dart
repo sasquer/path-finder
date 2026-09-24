@@ -8,6 +8,16 @@ abstract final class AppColors {
   static const buttonForeground = Colors.black87;
   static const icon = Colors.black45;
   static const hint = Colors.black38;
+
+  // Field cells on the Preview screen.
+  static const startCell = Color(0xFF64FFDA);
+  static const endCell = Color(0xFF009688);
+  static const blockedCell = Color(0xFF000000);
+  static const pathCell = Color(0xFF4CAF50);
+  static const emptyCell = Color(0xFFFFFFFF);
+  static const cellBorder = Colors.black87;
+  static const cellText = Colors.black;
+  static const blockedCellText = Colors.white;
 }
 
 abstract final class AppTheme {
@@ -34,9 +44,7 @@ abstract final class AppTheme {
         textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
       ),
     ),
-    inputDecorationTheme: const InputDecorationTheme(
-      hintStyle: TextStyle(color: AppColors.hint),
-    ),
+    inputDecorationTheme: const InputDecorationTheme(hintStyle: TextStyle(color: AppColors.hint)),
     iconTheme: const IconThemeData(color: AppColors.icon),
   );
 }

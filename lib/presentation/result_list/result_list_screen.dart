@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:path_finder/app/router/app_routes.dart';
 import 'package:path_finder/domain/entities/task_result.dart';
+import 'package:path_finder/presentation/common/widgets/path_text.dart';
 
 class ResultListScreen extends StatelessWidget {
   const ResultListScreen({super.key, required this.results});
@@ -49,13 +51,8 @@ class _ResultTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: result.hasPath
-          ? Text(result.path, textAlign: TextAlign.center)
-          : Text(
-              'No path found',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
-            ),
+      title: PathText(result: result),
+      onTap: () => Navigator.of(context).pushNamed(AppRoutes.preview, arguments: result),
     );
   }
 }

@@ -10,7 +10,7 @@ import 'package:path_finder/core/network/api_client.dart';
 class HttpApiClient implements ApiClient {
   HttpApiClient(
     this._client, {
-    this._timeout = const Duration(seconds: 5),
+    this._timeout = const Duration(seconds: 10),
     this._logger = const DefaultLogger(),
   });
 
