@@ -5,6 +5,7 @@ import 'package:path_finder/domain/entities/cell_type.dart';
 import 'package:path_finder/domain/entities/grid_point.dart';
 import 'package:path_finder/domain/entities/task_result.dart';
 import 'package:path_finder/presentation/common/widgets/path_text.dart';
+import 'package:path_finder/presentation/preview/widgets/field_view.dart';
 import 'package:path_finder/presentation/theme/app_theme.dart';
 
 class PreviewScreen extends StatelessWidget {
@@ -19,7 +20,7 @@ class PreviewScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            Flexible(flex: 3, child: _FieldGrid(result: result)),
+            Flexible(flex: 3, child: FieldView(result: result)),
             Flexible(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(8),
