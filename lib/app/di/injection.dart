@@ -11,8 +11,8 @@ import 'package:path_finder/data/repositories/tasks_repository_impl.dart';
 import 'package:path_finder/domain/entities/path_task.dart';
 import 'package:path_finder/domain/repositories/api_url_repository.dart';
 import 'package:path_finder/domain/repositories/tasks_repository.dart';
+import 'package:path_finder/domain/services/isolate_path_solver.dart';
 import 'package:path_finder/domain/services/path_solver.dart';
-import 'package:path_finder/domain/services/placeholder_path_solver.dart';
 import 'package:path_finder/presentation/home/cubit/home_cubit.dart';
 import 'package:path_finder/presentation/process/cubit/process_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -30,7 +30,7 @@ void configureDependencies() {
     ..registerLazySingleton<Toaster>(() => const FlutterToastToaster())
     ..registerLazySingleton<ApiUrlRepository>(() => ApiUrlRepositoryImpl(getIt()))
     ..registerLazySingleton<TasksRepository>(() => TasksRepositoryImpl(getIt()))
-    ..registerLazySingleton<PathSolver>(() => const PlaceholderPathSolver())
+    ..registerLazySingleton<PathSolver>(() => const IsolatePathSolver())
     ..registerFactory<HomeCubit>(
       () => HomeCubit(apiUrlRepository: getIt(), tasksRepository: getIt(), urlValidator: getIt()),
     )

@@ -8,8 +8,10 @@ class GridField extends Equatable {
         isSupportedSize(width: rows.isEmpty ? 0 : rows.first.length, height: rows.length),
         'Field size must be within $minSize..$maxSize in both dimensions',
       ),
+      assert(_hasOnlyKnownMarks(rows), 'Every cell must be either "$freeCell" or "$blockedCell"'),
       rows = List.unmodifiable(rows);
 
+  static const freeCell = '.';
   static const blockedCell = 'X';
 
   static const minSize = 1;
@@ -30,6 +32,9 @@ class GridField extends Equatable {
       _isSupportedDimension(width) && _isSupportedDimension(height);
 
   static bool _isSupportedDimension(int size) => size >= minSize && size <= maxSize;
+
+  static bool _hasOnlyKnownMarks(List<String> rows) =>
+      rows.every((row) => row.split('').every((cell) => cell == freeCell || cell == blockedCell));
 
   bool contains(GridPoint point) =>
       point.x >= 0 && point.x < width && point.y >= 0 && point.y < height;
