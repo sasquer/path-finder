@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_finder/app/di/injection.dart';
+import 'package:path_finder/app/router/app_routes.dart';
 import 'package:path_finder/domain/entities/path_task.dart';
+import 'package:path_finder/domain/entities/task_result.dart';
 import 'package:path_finder/presentation/common/widgets/primary_button_with_loader.dart';
 import 'package:path_finder/presentation/process/cubit/process_cubit.dart';
 import 'package:path_finder/presentation/process/cubit/process_state.dart';
@@ -23,8 +25,9 @@ class ProcessScreen extends StatelessWidget {
 class _ProcessView extends StatelessWidget {
   const _ProcessView();
 
-  void _sendResults() {
+  void _sendResults(BuildContext context, List<TaskResult> results) {
     // Sending results to the server.
+    Navigator.of(context).pushNamed(AppRoutes.resultList, arguments: results);
   }
 
   @override
@@ -43,12 +46,12 @@ class _ProcessView extends StatelessWidget {
                   ),
                 ),
               ),
-              if (state is ProcessCompleted)
+              if (state case ProcessCompleted(:final results))
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: PrimaryButtonWithLoader(
                     label: 'Send results to server',
-                    onPressed: _sendResults,
+                    onPressed: () => _sendResults(context, results),
                   ),
                 ),
             ],
