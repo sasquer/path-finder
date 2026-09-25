@@ -35,6 +35,8 @@ final class ProcessCompleted extends ProcessState {
 
   bool get isSending => sendStatus == SendStatus.sending;
 
+  bool get isSent => sendStatus == SendStatus.success;
+
   @override
   List<Object?> get props => [...super.props, results, sendStatus, sendError];
 }

@@ -61,7 +61,7 @@ class ProcessCubit extends Cubit<ProcessState> {
 
   Future<void> sendResults() async {
     final current = state;
-    if (current is! ProcessCompleted || current.isSending) return;
+    if (current is! ProcessCompleted || current.isSending || current.isSent) return;
     final results = current.results;
 
     emit(ProcessCompleted(results, sendStatus: SendStatus.sending));

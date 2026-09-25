@@ -4,6 +4,7 @@ import 'package:path_finder/app/di/injection.dart';
 import 'package:path_finder/app/router/app_routes.dart';
 import 'package:path_finder/core/ui/toaster.dart';
 import 'package:path_finder/domain/entities/path_task.dart';
+import 'package:path_finder/domain/entities/task_result.dart';
 import 'package:path_finder/presentation/common/error_messages.dart';
 import 'package:path_finder/presentation/common/widgets/primary_button_with_loader.dart';
 import 'package:path_finder/presentation/process/cubit/process_cubit.dart';
@@ -32,12 +33,30 @@ class _ProcessView extends StatelessWidget {
   void _onSendStatusChanged(BuildContext context, ProcessState state) {
     switch (state) {
       case ProcessCompleted(sendStatus: SendStatus.success, :final results):
-        Navigator.of(context).pushNamed(AppRoutes.resultList, arguments: results);
+        _showResults(context, results);
       case ProcessCompleted(sendStatus: SendStatus.failure, :final sendError?):
         getIt<Toaster>().show(sendError.userMessage);
       default:
         break;
     }
+  }
+
+  static void _showResults(BuildContext context, List<TaskResult> results) {
+    Navigator.of(context).pushNamed(AppRoutes.resultList, arguments: results);
+  }
+
+  static Widget _actionButton(BuildContext context, ProcessCompleted state) {
+    if (state.isSent) {
+      return PrimaryButtonWithLoader(
+        label: 'Show results',
+        onPressed: () => _showResults(context, state.results),
+      );
+    }
+    return PrimaryButtonWithLoader(
+      label: 'Send results to server',
+      isLoading: state.isSending,
+      onPressed: context.read<ProcessCubit>().sendResults,
+    );
   }
 
   @override
@@ -59,15 +78,8 @@ class _ProcessView extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (state case ProcessCompleted(:final isSending))
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: PrimaryButtonWithLoader(
-                      label: 'Send results to server',
-                      isLoading: isSending,
-                      onPressed: context.read<ProcessCubit>().sendResults,
-                    ),
-                  ),
+                if (state is ProcessCompleted)
+                  Padding(padding: const EdgeInsets.all(16), child: _actionButton(context, state)),
               ],
             ),
           ),
@@ -86,6 +98,7 @@ class _ProgressView extends StatelessWidget {
 
   String get _message => switch (state) {
     ProcessInProgress() => 'Calculating the shortest paths, please wait',
+    ProcessCompleted(isSent: true) => 'The results have been sent to the server',
     ProcessCompleted() => 'All calculations has finished, you can send your results to server',
     ProcessFailed() => 'Failed to calculate the paths. Go back and try again',
   };
